@@ -1,25 +1,32 @@
-// const {foo} = require('./helpers/helper');
+const http = require('node:http');
 
-// console.log('____________ main.js_____________');
-//
-// console.log(__dirname);
-// console.log(__filename);
-// console.log(process.cwd())
-// foo()
-
-
-const readline = require('node:readline');
 
 const foo = async () => {
-    const rlInstance = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    })
+    const server = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
 
-    rlInstance.question('What is your name?', (name) => {
-        console.log(`Hello ${name}`);
-        rlInstance.close();
-    })
+        const url = req.url;
+
+        if (url === '/about') {
+            switch (req.method) {
+                case 'GET':
+                    return res.end(JSON.stringify({
+                        data: 'About Page',
+                    }));
+                case 'POST':
+                    return res.end(JSON.stringify({
+                        data: 'About Page',
+                    }));
+            }
+        }
+        if (url === '/contact') {
+            return res.end(JSON.stringify({
+                data: 'Contact Page',
+            }));
+        }
+    });
+
+    server.listen(8000);
 }
 
 void foo();
