@@ -55,8 +55,20 @@
   },
   {
     "id": 10,
-    "name": "Irina",
-    "email": "irka7@gmail.com",
-    "password": "kkk222"
+    "name": "Dima",
+    "email": "222@te.com",
+    "password": "qwe123"
+  },
+  {
+    "id": 12,
+    "name": "Maks 2",
+    "email": "test@te.com",
+    "password": "qwe123"
+  },
+  {
+    "id": 13,
+    "name": "Maks 2",
+    "email": "test@te.com",
+    "password": "qwe123"
   }
 ]
