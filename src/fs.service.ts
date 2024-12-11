@@ -11,7 +11,6 @@ const read = async (): Promise<IUser[]> => {
     return json ? JSON.parse(json) : [];
   } catch (error) {
     console.log("Error:", error.message);
-
   }
 };
 
