@@ -12,12 +12,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/users", async (req: Request, res: Response): Promise<void> => {
   try {
-    const users = await read();
+            const users = await read();
     res.json(users);
   } catch (e) {
     res.status(500).json(e.message);
   }
 });
+
 // app.post('/users', async (req: Request, res: Response): Promise<void>  => {
 //     try {
 //         if (!req.body.name || req.body.name.length < 3) {
