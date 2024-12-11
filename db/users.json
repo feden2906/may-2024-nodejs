@@ -70,5 +70,11 @@
     "name": "Maks 2",
     "email": "test@te.com",
     "password": "qwe123"
+  },
+  {
+    "id": 14,
+    "name": "Maks 2f",
+    "email": "test@te.com",
+    "password": "qwdfge123"
   }
 ]
