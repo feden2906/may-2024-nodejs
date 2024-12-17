@@ -1,5 +1,9 @@
 import { ApiError } from "../errors/api-error";
-import { IUser, IUserDto } from "../interfaces/user.interface";
+import {
+  IUser,
+  IUserCreateDto,
+  IUserUpdateDto,
+} from "../interfaces/user.interface";
 import { userRepository } from "../repositories/user.repository";
 
 class UserService {
@@ -7,7 +11,8 @@ class UserService {
     return await userRepository.getList();
   }
 
-  public async create(dto: IUserDto): Promise<IUser> {
+  public async create(dto: IUserCreateDto): Promise<IUser> {
+    await this.isEmailUnique(dto.email);
     return await userRepository.create(dto);
   }
 
@@ -19,7 +24,7 @@ class UserService {
     return user;
   }
 
-  public async updateUser(userId: string, dto: IUserDto): Promise<IUser> {
+  public async updateUser(userId: string, dto: IUserUpdateDto): Promise<IUser> {
     const user = await userRepository.getById(userId);
     if (!user) {
       throw new ApiError("User not found", 404);
@@ -33,6 +38,13 @@ class UserService {
       throw new ApiError("User not found", 404);
     }
     await userRepository.deleteById(userId);
+  }
+
+  private async isEmailUnique(email: string): Promise<void> {
+    const user = await userRepository.getByEmail(email);
+    if (user) {
+      throw new ApiError("Email is already in use", 409);
+    }
   }
 }
 
