@@ -20,3 +20,5 @@ export type IUserCreateDto = Pick<
 >;
 
 export type IUserUpdateDto = Pick<IUser, "name" | "age" | "phone">;
+
+export type ILogin = Pick<IUser, "email" | "password">;

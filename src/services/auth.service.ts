@@ -1,6 +1,6 @@
 import { ApiError } from "../errors/api-error";
-import { ITokenPair } from "../interfaces/token.interface";
-import { IUser, IUserCreateDto } from "../interfaces/user.interface";
+import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
+import { ILogin, IUser, IUserCreateDto } from "../interfaces/user.interface";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { passwordService } from "./password.service";
@@ -22,8 +22,13 @@ class AuthService {
     return { user, tokens };
   }
 
-  public async signIn(dto: any): Promise<{ user: IUser; tokens: ITokenPair }> {
+  public async signIn(
+    dto: ILogin,
+  ): Promise<{ user: IUser; tokens: ITokenPair }> {
     const user = await userRepository.getByEmail(dto.email);
+    if (!user) {
+      throw new ApiError("Incorrect email or password", 401);
+    }
     const isPasswordCorrect = await passwordService.comparePassword(
       dto.password,
       user.password,
@@ -37,6 +42,19 @@ class AuthService {
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
     return { user, tokens };
+  }
+
+  public async refresh(
+    tokenPayload: ITokenPayload,
+    refreshToken: string,
+  ): Promise<ITokenPair> {
+    await tokenRepository.deleteOneByParams({ refreshToken });
+    const tokens = tokenService.generateTokens({
+      userId: tokenPayload.userId,
+      role: tokenPayload.role,
+    });
+    await tokenRepository.create({ ...tokens, _userId: tokenPayload.userId });
+    return tokens;
   }
 }
 
