@@ -8,6 +8,7 @@ export class UserValidator {
   private static email = joi.string().regex(regexConstant.EMAIL).trim();
   private static password = joi.string().regex(regexConstant.PASSWORD).trim();
   private static phone = joi.string().regex(regexConstant.PHONE).trim();
+  // private static role = joi.string().valid(...Object.values(RoleEnum));
 
   public static create = joi.object({
     name: this.name.required(),
