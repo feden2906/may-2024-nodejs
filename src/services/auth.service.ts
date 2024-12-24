@@ -64,6 +64,35 @@ class AuthService {
     await tokenRepository.create({ ...tokens, _userId: tokenPayload.userId });
     return tokens;
   }
+
+  public async logout(
+    tokenPayload: ITokenPayload,
+    tokenId: string,
+  ): Promise<void> {
+    const user = await userRepository.getById(tokenPayload.userId);
+    await tokenRepository.deleteOneByParams({ _id: tokenId });
+    await emailService.sendEmail(
+      EmailTypeEnum.LOGOUT,
+      "rusha.huyasha@gmail.com",
+      {
+        name: user.name,
+        frontUrl: config.frontUrl,
+      },
+    );
+  }
+
+  public async logoutAll(tokenPayload: ITokenPayload): Promise<void> {
+    const user = await userRepository.getById(tokenPayload.userId);
+    await tokenRepository.deleteAllByParams({ _userId: tokenPayload.userId });
+    await emailService.sendEmail(
+      EmailTypeEnum.LOGOUT,
+      "rusha.huyasha@gmail.com",
+      {
+        name: user.name,
+        frontUrl: config.frontUrl,
+      },
+    );
+  }
 }
 
 export const authService = new AuthService();
