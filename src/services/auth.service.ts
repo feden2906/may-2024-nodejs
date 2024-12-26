@@ -1,8 +1,16 @@
 import { config } from "../configs/config";
+import { ActionTokenTypeEnum } from "../enums/action-token-type.enum";
 import { EmailTypeEnum } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
-import { ILogin, IUser, IUserCreateDto } from "../interfaces/user.interface";
+import {
+  IForgotPassword,
+  IForgotPasswordSet,
+  ILogin,
+  IUser,
+  IUserCreateDto,
+} from "../interfaces/user.interface";
+import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { emailService } from "./email.service";
@@ -92,6 +100,46 @@ class AuthService {
         frontUrl: config.frontUrl,
       },
     );
+  }
+
+  public async forgotPassword(dto: IForgotPassword): Promise<void> {
+    const user = await userRepository.getByEmail(dto.email);
+    if (!user) return;
+
+    const token = tokenService.generateActionTokens(
+      { userId: user._id, role: user.role },
+      ActionTokenTypeEnum.FORGOT_PASSWORD,
+    );
+    await actionTokenRepository.create({
+      type: ActionTokenTypeEnum.FORGOT_PASSWORD,
+      _userId: user._id,
+      token,
+    });
+    await emailService.sendEmail(EmailTypeEnum.FORGOT_PASSWORD, dto.email, {
+      name: user.name,
+      frontUrl: config.frontUrl,
+      actionToken: token,
+    });
+  }
+
+  public async forgotPasswordSet(dto: IForgotPasswordSet): Promise<void> {
+    const payload = tokenService.verifyToken(
+      dto.token,
+      ActionTokenTypeEnum.FORGOT_PASSWORD,
+    );
+    const entity = await actionTokenRepository.findOneByParams({
+      token: dto.token,
+    });
+    if (!entity) {
+      throw new ApiError("Invalid token", 401);
+    }
+    const password = await passwordService.hashPassword(dto.password);
+    await userRepository.updateById(payload.userId, { password });
+
+    await Promise.all([
+      actionTokenRepository.deleteOneByParams({ token: dto.token }),
+      tokenRepository.deleteAllByParams({ _userId: payload.userId }),
+    ]);
   }
 }
 

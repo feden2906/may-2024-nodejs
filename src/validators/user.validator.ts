@@ -28,4 +28,8 @@ export class UserValidator {
     email: this.email.required(),
     password: this.password.required(),
   });
+
+  public static forgotPassword = joi.object({
+    email: this.email.required(),
+  });
 }
