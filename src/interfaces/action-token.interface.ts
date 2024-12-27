@@ -8,3 +8,7 @@ export interface IActionToken {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IVerifyToken {
+  token: string;
+}

@@ -2,6 +2,7 @@ import { config } from "../configs/config";
 import { ActionTokenTypeEnum } from "../enums/action-token-type.enum";
 import { EmailTypeEnum } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api-error";
+import { IVerifyToken } from "../interfaces/action-token.interface";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import {
   IForgotPassword,
@@ -30,10 +31,20 @@ class AuthService {
       role: user.role,
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
+
+    const actionToken = tokenService.generateActionTokens(
+      { userId: user._id, role: user.role },
+      ActionTokenTypeEnum.EMAIL_VERIFICATION,
+    );
+    await actionTokenRepository.create({
+      type: ActionTokenTypeEnum.EMAIL_VERIFICATION,
+      _userId: user._id,
+      token: actionToken,
+    });
     await emailService.sendEmail(
       EmailTypeEnum.WELCOME,
       "rusha.huyasha@gmail.com",
-      { name: user.name, frontUrl: config.frontUrl },
+      { name: user.name, frontUrl: config.frontUrl, actionToken },
     );
     return { user, tokens };
   }
@@ -122,24 +133,25 @@ class AuthService {
     });
   }
 
-  public async forgotPasswordSet(dto: IForgotPasswordSet): Promise<void> {
-    const payload = tokenService.verifyToken(
-      dto.token,
-      ActionTokenTypeEnum.FORGOT_PASSWORD,
-    );
-    const entity = await actionTokenRepository.findOneByParams({
-      token: dto.token,
-    });
-    if (!entity) {
-      throw new ApiError("Invalid token", 401);
-    }
+  public async forgotPasswordSet(
+    dto: IForgotPasswordSet,
+    tokenPayload: ITokenPayload,
+  ): Promise<void> {
     const password = await passwordService.hashPassword(dto.password);
-    await userRepository.updateById(payload.userId, { password });
+    await userRepository.updateById(tokenPayload.userId, { password });
 
     await Promise.all([
       actionTokenRepository.deleteOneByParams({ token: dto.token }),
-      tokenRepository.deleteAllByParams({ _userId: payload.userId }),
+      tokenRepository.deleteAllByParams({ _userId: tokenPayload.userId }),
     ]);
+  }
+
+  public async verify(
+    dto: IVerifyToken,
+    tokenPayload: ITokenPayload,
+  ): Promise<void> {
+    await userRepository.updateById(tokenPayload.userId, { isVerified: true });
+    await actionTokenRepository.deleteOneByParams({ token: dto.token });
   }
 }
 
