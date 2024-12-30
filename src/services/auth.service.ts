@@ -5,6 +5,7 @@ import { ApiError } from "../errors/api-error";
 import { IVerifyToken } from "../interfaces/action-token.interface";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import {
+  IChangePassword,
   IForgotPassword,
   IForgotPasswordSet,
   ILogin,
@@ -152,6 +153,23 @@ class AuthService {
   ): Promise<void> {
     await userRepository.updateById(tokenPayload.userId, { isVerified: true });
     await actionTokenRepository.deleteOneByParams({ token: dto.token });
+  }
+
+  public async changePassword(
+    dto: IChangePassword,
+    tokenPayload: ITokenPayload,
+  ): Promise<void> {
+    const user = await userRepository.getById(tokenPayload.userId);
+    const isPasswordCorrect = await passwordService.comparePassword(
+      dto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordCorrect) {
+      throw new ApiError("Incorrect password", 401);
+    }
+    const password = await passwordService.hashPassword(dto.newPassword);
+    await userRepository.updateById(tokenPayload.userId, { password });
+    await tokenRepository.deleteAllByParams({ _userId: tokenPayload.userId });
   }
 }
 
