@@ -13,6 +13,7 @@ import {
   IUserCreateDto,
 } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
+import { oldPasswordRepository } from "../repositories/old-password.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { emailService } from "./email.service";
@@ -160,6 +161,9 @@ class AuthService {
     tokenPayload: ITokenPayload,
   ): Promise<void> {
     const user = await userRepository.getById(tokenPayload.userId);
+    const oldPasswords = await oldPasswordRepository.getListByUserId(
+      tokenPayload.userId,
+    );
     const isPasswordCorrect = await passwordService.comparePassword(
       dto.oldPassword,
       user.password,
@@ -167,9 +171,32 @@ class AuthService {
     if (!isPasswordCorrect) {
       throw new ApiError("Incorrect password", 401);
     }
+
+    await Promise.all(
+      [...oldPasswords, { password: user.password }].map(
+        async (oldPassword) => {
+          const isPrev = await passwordService.comparePassword(
+            dto.newPassword,
+            oldPassword.password,
+          );
+          if (isPrev) {
+            throw new ApiError(
+              "Password can't be the same as the previous one",
+              409,
+            );
+          }
+        },
+      ),
+    );
+
     const password = await passwordService.hashPassword(dto.newPassword);
+
     await userRepository.updateById(tokenPayload.userId, { password });
     await tokenRepository.deleteAllByParams({ _userId: tokenPayload.userId });
+    await oldPasswordRepository.create({
+      _userId: user._id,
+      password: user.password,
+    });
   }
 }
 
