@@ -61,6 +61,17 @@ class UserController {
     }
   }
 
+  public async deleteAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
+      const result = await userService.deleteAvatar(tokenPayload);
+      const response = userPresenter.toResponse(result);
+      res.status(201).json(response);
+    } catch (e) {
+      next(e);
+    }
+  }
+
   public async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.params.userId;

@@ -51,8 +51,16 @@ class UserService {
     );
     const updatedUser = await userRepository.updateById(user._id, { avatar });
     if (user.avatar) {
-      // await s3Service.deleteFile(user.avatar); // TODO add this method to s3.service.ts
+      await s3Service.deleteFile(user.avatar);
     }
+    return updatedUser;
+  }
+  public async deleteAvatar(tokenPayload: ITokenPayload): Promise<IUser> {
+    const user = await userRepository.getById(tokenPayload.userId);
+    await s3Service.deleteFile(user.avatar);
+    const updatedUser = await userRepository.updateById(user._id, {
+      avatar: null,
+    });
     return updatedUser;
   }
 
