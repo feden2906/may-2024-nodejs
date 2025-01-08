@@ -1,0 +1,4 @@
+export enum ActionTokenTypeEnum {
+  FORGOT_PASSWORD = "FORGOT_PASSWORD",
+  EMAIL_VERIFICATION = "EMAIL_VERIFICATION",
+}
