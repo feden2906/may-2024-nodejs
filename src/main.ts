@@ -1,3 +1,5 @@
+// import { rateLimit } from "express-rate-limit";
+import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import expressFileUpload from "express-fileupload";
 import mongoose from "mongoose";
@@ -12,12 +14,23 @@ import { userRouter } from "./routers/user.router";
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "*",
+    methods: ["POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+  }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(expressFileUpload());
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// app.use(rateLimit({ windowMs: 30 * 1000, limit: 10 }));
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
 

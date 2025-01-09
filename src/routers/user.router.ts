@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
 
 import { AvatarConfig } from "../constants/image.constants";
 import { userController } from "../controllers/user.controller";
@@ -15,7 +16,12 @@ router.get(
   userController.getList,
 );
 
-router.get("/me", authMiddleware.checkAccessToken, userController.getMe);
+router.get(
+  "/me",
+  rateLimit({ windowMs: 1000, limit: 1 }),
+  authMiddleware.checkAccessToken,
+  userController.getMe,
+);
 router.put(
   "/me",
   authMiddleware.checkAccessToken,

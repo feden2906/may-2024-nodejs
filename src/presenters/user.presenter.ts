@@ -30,6 +30,7 @@ class UserPresenter {
     return {
       _id: entity._id,
       name: entity.name,
+      age: entity.age,
       avatar: entity.avatar
         ? `${config.AWS_S3_ENDPOINT}/${entity.avatar}`
         : null,

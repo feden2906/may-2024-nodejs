@@ -58,7 +58,7 @@ export type IUserResponse = Pick<
 >;
 export type IUserShortResponse = Pick<
   IUser,
-  "_id" | "name" | "avatar" | "createdAt"
+  "_id" | "name" | "age" | "avatar" | "createdAt"
 >;
 
 export interface IUserListResponse extends IUserListQuery {
