@@ -16,6 +16,7 @@ export interface IUser {
   createdAt: Date;
   updatedAt: Date;
 }
+export type IUserPartial = Partial<IUser>;
 
 export type IUserCreateDto = Pick<
   IUser,

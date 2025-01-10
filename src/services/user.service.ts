@@ -1,5 +1,6 @@
 import { UploadedFile } from "express-fileupload";
 
+import { MeasureExecutionTime } from "../decorators/measure-time.decorator";
 import { FileItemTypeEnum } from "../enums/file-item-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPayload } from "../interfaces/token.interface";
@@ -19,7 +20,9 @@ class UserService {
     return userPresenter.toResponseList(entities, total, query);
   }
 
-  public async getMe(tokenPayload: ITokenPayload): Promise<IUser> {
+  @MeasureExecutionTime
+  public async getMe(tokenPayload: ITokenPayload, www: any): Promise<IUser> {
+    console.log(www);
     const user = await userRepository.getById(tokenPayload.userId);
     if (!user) {
       throw new ApiError("User not found", 404);

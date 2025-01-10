@@ -5,7 +5,7 @@ import { ApiError } from "../errors/api-error";
 import {
   IUser,
   IUserCreateDto,
-  IUserListQuery,
+  IUserListQuery, IUserPartial,
 } from "../interfaces/user.interface";
 import { Token } from "../models/token.model";
 import { User } from "../models/user.model";
@@ -58,7 +58,7 @@ class UserRepository {
     return await User.findOne({ email });
   }
 
-  public async updateById(userId: string, dto: Partial<IUser>): Promise<IUser> {
+  public async updateById(userId: string, dto: IUserPartial): Promise<IUser> {
     return await User.findByIdAndUpdate(userId, dto, { new: true });
   }
 

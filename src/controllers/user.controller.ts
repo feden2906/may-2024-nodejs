@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UploadedFile } from "express-fileupload";
 
+import { MeasureExecutionTime } from "../decorators/measure-time.decorator";
 import { ITokenPayload } from "../interfaces/token.interface";
 import { IUserListQuery, IUserUpdateDto } from "../interfaces/user.interface";
 import { userPresenter } from "../presenters/user.presenter";
@@ -17,6 +18,7 @@ class UserController {
     }
   }
 
+  // @MeasureExecutionTime
   public async getMe(req: Request, res: Response, next: NextFunction) {
     try {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
@@ -28,6 +30,7 @@ class UserController {
     }
   }
 
+  // @MeasureExecutionTime
   public async updateMe(req: Request, res: Response, next: NextFunction) {
     try {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
@@ -40,6 +43,7 @@ class UserController {
     }
   }
 
+  @MeasureExecutionTime
   public async deleteMe(req: Request, res: Response, next: NextFunction) {
     try {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;

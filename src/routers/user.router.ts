@@ -26,6 +26,7 @@ router.put(
   "/me",
   authMiddleware.checkAccessToken,
   commonMiddleware.validateBody(UserValidator.update),
+// @ts-ignore
   userController.updateMe,
 );
 router.delete("/me", authMiddleware.checkAccessToken, userController.deleteMe);
